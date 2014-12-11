@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dashboard</title>
+
+	{% load drealtimetags %}
+	{% ishout_js %}
+	<script stype="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function(){
+
+	});
+	ishout.on('notifications', function(data){
+	    alert(data.msg);
+	});
+	ishout.on('chat', function(data){
+	    if (data.type == "typing"){
+  			$("#status-chat").html("<span>"+data.emiiter +" "+ data.msg+"</span>");
+  		} else {
+  			$("#status-chat").html("");
+  		}
+	});
+	ishout.on('enterChat', function(data){
+  		$("#chat").append("<div>"+data.emiiter +": "+ data.msg+"</div>");
+	});
+	/*var socket = io("http://localhost:5500");
+	socket.on('connect', function(){
+		console.log("connects");
+	});
+  	socket.on('chat', function(data){
+  		if (data.type == "typing"){
+  			$("#status-chat").html(data.emiiter +" typing...");
+  		} else {
+  			$("#status-chat").html("");
+  		}
+  	});
+  	socket.on('disconnect', function(){
+  		console.log("disconnect");
+  	});*/
+	
+	function Chatting(){
+		if($("#chat-msg").val().trim() != ""){
+			var user = $("#chat-msg").data("user"),
+			//socket.emit("chat",{msg:"typing..", type:"typing", emiiter : user});
+			data = {
+				emiiter: user,
+				msg:"typing..",
+				type:"typing"
+			};
+			ishout.sendMessage('chat', data);
+		} else {
+			endChatting();
+		}
+	}
+
+	function endChatting(){
+		var user = $("#chat-msg").data("user"),
+		//socket.emit("chat",{msg:"typing..", type:"endtype", emiiter : user});
+		data = {
+			emiiter: user,
+			msg:"typing..",
+			type:"endtyping"
+		};
+		ishout.sendMessage('chat', data);
+	}
+
+	function enterChat(event,ele){
+		if((event.keyCode == 13 || event.which == 13) && ele.value.trim() != "" ){
+			var user = $("#chat-msg").data("user"),
+			token = $("#chat-msg").data("token"),
+			//socket.emit("chat",{msg:"typing..", type:"endtype", emiiter : user});
+			data = {
+				emiiter: user,
+				msg:ele.value,
+				type:"enterChat",
+				token:token,
+			};
+			ishout.sendMessage('enterChat', data);
+			endChatting();
+			ele.value="";
+		} else {
+			Chatting();
+		}
+	}
+
+	ishout.init();
+	</script>
+
+
+
+</head>
+<body>
+
+
+<h1> Dashboard</h1>
+<div id="chat" style="height:200px;background-color:#ccc;color:#fff;">
+<div id="status-chat" style="height:20px;background-color:#bbb;color:#fff;"></div>
+</div>
+<input type="text" data-token="{{ csrf_token }}" id="chat-msg" data-user="{{user}}" onkeypress="enterChat(event, this)" value="" />
+{{message}}
+
+{%for user in users%}
+
+{{user}}<a href="/alert/?user={{user.id}}"> Alert (Hello)</a><br/>
+
+{%empty%}
+
+<b> No users found</b>
+
+
+{%endfor%}
+</body>
+</html>
+
+
