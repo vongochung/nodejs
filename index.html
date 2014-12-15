@@ -1,0 +1,57 @@
+{% load staticfiles i18n%}
+<section>   
+    <span class="tooltip"></span> <!-- Tooltip -->
+    <div id="slider"></div> <!-- the Slider -->
+    <span class="volume"></span> <!-- Volume -->
+</section>
+<link rel="stylesheet" type="text/css" href="{% static 'css/slider-video.css' %}">
+<script stype="text/javascript" src="//code.jquery.com/jquery-1.7.1.min.js"></script>
+<script src="{% static 'js/jquery-ui-1.8.21.custom.min.js' %}"></script>
+<script>
+
+    jQuery(document).ready(function($) {
+
+        //Store frequently elements in variables
+        var slider  = $('#slider'),
+            tooltip = $('.tooltip');
+
+        //Hide the Tooltip at first
+        tooltip.hide();
+
+        //Call the Slider
+        slider.slider({
+            //Config
+            range: "min",
+            min: 1,
+            value: 35,
+            max: 100,
+
+            start: function(event,ui) {
+                tooltip.fadeIn('fast');
+            },
+
+            //Slider Event
+            slide: function(event, ui) { //When the slider is sliding
+                var value  = slider.slider('value'),
+                    volume = $('.volume');
+                tooltip.css('left', value).text(ui.value);  //Adjust the tooltip accordingly
+                volume.text(ui.value);
+            },
+
+            stop: function(event,ui) {
+                tooltip.fadeOut('fast');
+            }
+        });
+
+    });
+
+
+</script>
+
+<script type="text/javascript">
+    function youtubeFeedCallback(json){
+    document.write("Title: " + json["data"]["title"] + "<br>");
+    document.write("Duration: " + json["data"]["duration"] + "<br>");
+    }
+</script>
+<script type="text/javascript" src="http://gdata.youtube.com/feeds/api/videos/lF3zU2FF-dQ?v=2&alt=jsonc&callback=youtubeFeedCallback&prettyprint=true"></script>
