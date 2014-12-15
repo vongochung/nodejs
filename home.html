@@ -11,7 +11,7 @@
 
 	});
 	ishout.on('notifications', function(data){
-	    alert(data.msg);
+	    $(".posts").append("<div class=\"post\"><img src=\""+ data.img +"\"/><p>"+ data.msg +"</p></div>");
 	});
 	ishout.on('chat', function(data){
 	    if (data.type == "typing"){
@@ -23,25 +23,10 @@
 	ishout.on('enterChat', function(data){
   		$("#chat").append("<div>"+data.emiiter +": "+ data.msg+"</div>");
 	});
-	/*var socket = io("http://localhost:5500");
-	socket.on('connect', function(){
-		console.log("connects");
-	});
-  	socket.on('chat', function(data){
-  		if (data.type == "typing"){
-  			$("#status-chat").html(data.emiiter +" typing...");
-  		} else {
-  			$("#status-chat").html("");
-  		}
-  	});
-  	socket.on('disconnect', function(){
-  		console.log("disconnect");
-  	});*/
 	
-	function Chatting(){
-		if($("#chat-msg").val().trim() != ""){
+	function Chatting(val){
+		if(val != "" && val.length >= 0){
 			var user = $("#chat-msg").data("user"),
-			//socket.emit("chat",{msg:"typing..", type:"typing", emiiter : user});
 			data = {
 				emiiter: user,
 				msg:"typing..",
@@ -55,7 +40,6 @@
 
 	function endChatting(){
 		var user = $("#chat-msg").data("user"),
-		//socket.emit("chat",{msg:"typing..", type:"endtype", emiiter : user});
 		data = {
 			emiiter: user,
 			msg:"typing..",
@@ -65,10 +49,11 @@
 	}
 
 	function enterChat(event,ele){
-		if((event.keyCode == 13 || event.which == 13) && ele.value.trim() != "" ){
+		var code = event.keyCode || event.which,
+			real_val = $("#chat-msg").val().trim() + String.fromCharCode(code);
+		if( code == 13 && real_val != "" ){
 			var user = $("#chat-msg").data("user"),
 			token = $("#chat-msg").data("token"),
-			//socket.emit("chat",{msg:"typing..", type:"endtype", emiiter : user});
 			data = {
 				emiiter: user,
 				msg:ele.value,
@@ -79,7 +64,8 @@
 			endChatting();
 			ele.value="";
 		} else {
-			Chatting();
+			if (code == 8) real_val = real_val.substr(0, real_val.length - 2);
+			Chatting(real_val);
 		}
 	}
 
@@ -93,10 +79,12 @@
 
 
 <h1> Dashboard</h1>
+<div class="posts">
+</div>
 <div id="chat" style="height:200px;background-color:#ccc;color:#fff;">
 <div id="status-chat" style="height:20px;background-color:#bbb;color:#fff;"></div>
 </div>
-<input type="text" data-token="{{ csrf_token }}" id="chat-msg" data-user="{{user}}" onkeypress="enterChat(event, this)" value="" />
+<input type="text" data-token="{{ csrf_token }}"  id="chat-msg" data-user="{{user}}" onkeydown="enterChat(event, this)"  value="" />
 {{message}}
 
 {%for user in users%}
